@@ -1,8 +1,0 @@
-2025-05-21 12:32:11,702 - data_manager - WARNING - File data/config.json not found. Returning default data.
-2025-05-21 12:33:09,627 - data_manager - WARNING - File data/config.json not found. Returning default data.
-2025-05-21 12:33:45,024 - data_manager - WARNING - File data/config.json not found. Returning default data.
-2025-05-21 12:33:46,270 - data_manager - WARNING - File data/config.json not found. Returning default data.
-2025-05-21 12:33:48,977 - data_manager - WARNING - File data/config.json not found. Returning default data.
-2025-05-21 14:19:14,894 - utils - INFO - Fetching from arXiv: http://export.arxiv.org/api/query?id_list=2405.19534
-2025-05-21 14:19:16,571 - utils - WARNING - No entry found for arXiv ID: 2405.19534
-2025-05-21 14:30:33,030 - data_manager - WARNING - File data/config.json not found. Returning default data.

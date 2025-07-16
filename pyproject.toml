@@ -1,21 +1,20 @@
-[project]
+[tool.poetry]
 name = "flashpapers"
 version = "0.1.0"
-description = ""
+description = "Flashpaper App to help you recall papers quickly!"
 authors = [
-    {name = "Raman",email = "raman.r@zohocorp.com"}
+    {name = "Raman", email = "ramanrajarathinam@gmail.com"}
 ]
 readme = "README.md"
-requires-python = ">=3.10"
-dependencies = [
-    "streamlit (>=1.45.1,<2.0.0)",
-    "pandas (>=2.2.3,<3.0.0)",
-    "arxiv (>=2.2.0,<3.0.0)",
-    "black (>=25.1.0,<26.0.0)",
-    "isort (>=6.0.1,<7.0.0)"
-]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+streamlit = "^1.46.1"
+black = "^25.1.0"
+isort = "^6.0.1"
+ruff = "^0.12.3"
 
 
 [build-system]
-requires = ["poetry-core>=2.0.0,<3.0.0"]
+requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"

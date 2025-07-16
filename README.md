@@ -26,8 +26,7 @@ A modular, robust, and user-friendly flashpapers app built with Streamlit. Suppo
    ```
 
 ## Requirements
-- Python 3.8+
+- Python 3.10+
 - Streamlit
 - Pandas
 - Arxiv
-
