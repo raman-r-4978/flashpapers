@@ -4,7 +4,7 @@ import json
 import shutil
 from datetime import datetime
 from pathlib import Path
-from typing import List, Optional
+from typing import Dict, List, Optional
 
 import pandas as pd
 
@@ -24,12 +24,44 @@ class FlashcardStorage:
         self.storage_path = storage_path or Path("data/flashpapers.json")
         self.storage_path.parent.mkdir(parents=True, exist_ok=True)
         self._ensure_storage_exists()
+        # Cache management
+        self._cache: Optional[List[Flashpaper]] = None
+        self._cache_timestamp: Optional[float] = None
+        self._id_index: Optional[Dict[str, Flashpaper]] = None
 
     def _ensure_storage_exists(self) -> None:
         """Create storage file if it doesn't exist."""
         if not self.storage_path.exists():
             with open(self.storage_path, "w", encoding="utf-8") as f:
                 json.dump([], f)
+
+    def _get_cache(self) -> Optional[List[Flashpaper]]:
+        """
+        Get cached data if valid, otherwise None.
+
+        Returns:
+            Cached flashpapers list if cache is valid, None otherwise
+        """
+        if self._cache is None or self._cache_timestamp is None:
+            return None
+
+        # Check if file has been modified since cache was created
+        if self.storage_path.exists():
+            file_mtime = self.storage_path.stat().st_mtime
+            if file_mtime > self._cache_timestamp:
+                # File was modified, cache is invalid
+                self._cache = None
+                self._cache_timestamp = None
+                self._id_index = None
+                return None
+
+        return self._cache
+
+    def invalidate_cache(self) -> None:
+        """Invalidate the cache."""
+        self._cache = None
+        self._cache_timestamp = None
+        self._id_index = None
 
     def load_flashcards(self) -> pd.DataFrame:
         """
@@ -56,14 +88,28 @@ class FlashcardStorage:
     def load_all(self) -> List[Flashpaper]:
         """
         Load all flashpapers from storage.
+        Uses cache if available and valid.
 
         Returns:
             List of Flashpaper objects
         """
+        # Check cache first
+        cached = self._get_cache()
+        if cached is not None:
+            return cached
+
+        # Load from file
         try:
             with open(self.storage_path, "r", encoding="utf-8") as f:
                 data = json.load(f)
-            return [Flashpaper(**item) for item in data]
+            flashpapers = [Flashpaper(**item) for item in data]
+
+            # Update cache
+            self._cache = flashpapers
+            self._cache_timestamp = datetime.now().timestamp()
+            self._id_index = None  # Will be rebuilt when needed
+
+            return flashpapers
         except Exception as e:
             print(f"Error loading flashpapers: {e}")
             return []
@@ -71,6 +117,7 @@ class FlashcardStorage:
     def load_by_id(self, flashpaper_id: str) -> Optional[Flashpaper]:
         """
         Load a specific flashpaper by ID.
+        Uses cached data and dictionary index for O(1) lookup.
 
         Args:
             flashpaper_id: ID of the flashpaper
@@ -78,11 +125,13 @@ class FlashcardStorage:
         Returns:
             Flashpaper object or None if not found
         """
-        flashpapers = self.load_all()
-        for fp in flashpapers:
-            if fp.id == flashpaper_id:
-                return fp
-        return None
+        # Get or build ID index
+        if self._id_index is None:
+            flashpapers = self.load_all()
+            self._id_index = {fp.id: fp for fp in flashpapers}
+
+        # Lookup in index
+        return self._id_index.get(flashpaper_id)
 
     def save_all(self, flashpapers: List[Flashpaper]) -> None:
         """
@@ -94,6 +143,10 @@ class FlashcardStorage:
         data = [fp.model_dump() for fp in flashpapers]
         with open(self.storage_path, "w", encoding="utf-8") as f:
             json.dump(data, f, indent=2, default=str)
+        # Update cache after save
+        self._cache = flashpapers
+        self._cache_timestamp = datetime.now().timestamp()
+        self._id_index = {fp.id: fp for fp in flashpapers}
 
     def add(self, flashpaper: Flashpaper) -> str:
         """
@@ -187,6 +240,8 @@ class FlashcardStorage:
 
             # Restore from backup
             shutil.copy2(backup_path, self.storage_path)
+            # Invalidate cache after restore
+            self.invalidate_cache()
             return True
         except Exception as e:
             print(f"Error restoring from backup: {e}")
@@ -195,8 +250,12 @@ class FlashcardStorage:
     def get_count(self) -> int:
         """
         Get total count of flashpapers.
+        Uses cache when available.
 
         Returns:
             Number of flashpapers
         """
+        cached = self._get_cache()
+        if cached is not None:
+            return len(cached)
         return len(self.load_all())

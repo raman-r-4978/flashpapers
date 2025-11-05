@@ -3,7 +3,9 @@
 import streamlit as st
 
 from flashpapers.config import ConfigManager
+from flashpapers.models import Flashpaper
 from flashpapers.utils import FlashcardDataHandler, FlashcardStorage
+from typing import List
 
 # Page configuration
 st.set_page_config(
@@ -23,6 +25,28 @@ if "data_handler" not in st.session_state:
 if "config_manager" not in st.session_state:
     st.session_state.config_manager = ConfigManager()
     st.session_state.config = st.session_state.config_manager.get_config()
+
+# Cache management functions
+def get_cached_flashpapers() -> List[Flashpaper]:
+    """
+    Get flashpapers from session state cache or load from storage.
+    
+    Returns:
+        List of Flashpaper objects
+    """
+    cache_key = "_flashpapers_cache"
+    if cache_key not in st.session_state:
+        st.session_state[cache_key] = st.session_state.storage.load_all()
+    return st.session_state[cache_key]
+
+
+def invalidate_flashpapers_cache() -> None:
+    """Invalidate the flashpapers cache in session state."""
+    cache_key = "_flashpapers_cache"
+    if cache_key in st.session_state:
+        del st.session_state[cache_key]
+    # Also invalidate storage cache
+    st.session_state.storage.invalidate_cache()
 
 # Main page
 st.title("📚 Flashpapers")
@@ -44,8 +68,8 @@ Select a page from the sidebar to get started.
 with st.sidebar:
     st.header("⚙️ Settings")
 
-    # Display statistics
-    total_papers = st.session_state.storage.get_count()
+    # Display statistics (uses cache)
+    total_papers = len(get_cached_flashpapers())
     st.metric("Total Papers", total_papers)
 
     # Categories management

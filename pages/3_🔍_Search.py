@@ -1,10 +1,28 @@
 """Search and browse papers."""
 
 import streamlit as st
+from typing import List
 
+from flashpapers.models import Flashpaper
 from flashpapers.utils import SearchUtils
 
 st.set_page_config(page_title="Search Papers", page_icon="🔍", layout="wide")
+
+
+def get_cached_flashpapers() -> List[Flashpaper]:
+    """Get flashpapers from session state cache or load from storage."""
+    cache_key = "_flashpapers_cache"
+    if cache_key not in st.session_state:
+        st.session_state[cache_key] = st.session_state.storage.load_all()
+    return st.session_state[cache_key]
+
+
+def invalidate_flashpapers_cache() -> None:
+    """Invalidate the flashpapers cache in session state."""
+    cache_key = "_flashpapers_cache"
+    if cache_key in st.session_state:
+        del st.session_state[cache_key]
+    st.session_state.storage.invalidate_cache()
 
 st.title("🔍 Search Papers")
 
@@ -12,6 +30,7 @@ st.title("🔍 Search Papers")
 storage = st.session_state.storage
 search_utils = SearchUtils(storage)
 data_handler = st.session_state.data_handler
+cached_flashpapers = get_cached_flashpapers()
 
 # Search controls
 col1, col2 = st.columns([3, 1])
@@ -30,18 +49,21 @@ with st.expander("🔧 Advanced Filters"):
 
     with col1:
         # Category filter
-        all_categories = search_utils.get_all_categories()
+        all_categories = search_utils.get_all_categories(flashpapers=cached_flashpapers)
         selected_categories = st.multiselect("Filter by Categories", options=all_categories)
 
     with col2:
         # Keyword filter
-        all_keywords = search_utils.get_all_tags()
+        all_keywords = search_utils.get_all_tags(flashpapers=cached_flashpapers)
         selected_keywords = st.multiselect("Filter by Keywords", options=all_keywords)
 
 # Perform search
 if search_button or search_query or selected_categories or selected_keywords:
     results = search_utils.search_flashcards(
-        query=search_query or "", categories=selected_categories or None, keywords=selected_keywords or None
+        query=search_query or "",
+        categories=selected_categories or None,
+        keywords=selected_keywords or None,
+        flashpapers=cached_flashpapers,
     )
 
     st.markdown(f"### Found {len(results)} paper(s)")
@@ -117,6 +139,7 @@ if search_button or search_query or selected_categories or selected_keywords:
                         type="secondary",
                     ):
                         if data_handler.delete_flashcard(paper.id):
+                            invalidate_flashpapers_cache()
                             st.success("Paper deleted!")
                             st.rerun()
                         else:
@@ -156,7 +179,7 @@ if search_button or search_query or selected_categories or selected_keywords:
 else:
     # Show recent papers by default
     st.markdown("### 📚 Recent Papers")
-    recent_papers = search_utils.get_recent_papers(limit=10)
+    recent_papers = search_utils.get_recent_papers(limit=10, flashpapers=cached_flashpapers)
 
     if recent_papers:
         for paper in recent_papers:
@@ -184,7 +207,7 @@ with st.sidebar:
     from flashpapers.utils import AnalyticsUtils
 
     analytics = AnalyticsUtils(storage)
-    stats = analytics.get_analytics()
+    stats = analytics.get_analytics(flashpapers=cached_flashpapers)
 
     st.metric("Total Papers", stats["total_papers"])
     st.metric("Reviewed Papers", stats["reviewed_papers"])
@@ -199,7 +222,7 @@ with st.sidebar:
 
     # Keywords cloud
     st.subheader("Popular Keywords")
-    all_keywords = search_utils.get_all_tags()
+    all_keywords = search_utils.get_all_tags(flashpapers=cached_flashpapers)
     if all_keywords:
         st.write(", ".join(all_keywords[:10]))
     else:

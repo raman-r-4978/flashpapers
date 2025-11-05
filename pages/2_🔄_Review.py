@@ -1,10 +1,27 @@
 """Review papers using spaced repetition."""
 
 import streamlit as st
+from typing import List
 
-from flashpapers.models import ReviewResponse
+from flashpapers.models import Flashpaper, ReviewResponse
 
 st.set_page_config(page_title="Review Papers", page_icon="🔄", layout="wide")
+
+
+def get_cached_flashpapers() -> List[Flashpaper]:
+    """Get flashpapers from session state cache or load from storage."""
+    cache_key = "_flashpapers_cache"
+    if cache_key not in st.session_state:
+        st.session_state[cache_key] = st.session_state.storage.load_all()
+    return st.session_state[cache_key]
+
+
+def invalidate_flashpapers_cache() -> None:
+    """Invalidate the flashpapers cache in session state."""
+    cache_key = "_flashpapers_cache"
+    if cache_key in st.session_state:
+        del st.session_state[cache_key]
+    st.session_state.storage.invalidate_cache()
 
 st.title("🔄 Review Papers")
 
@@ -38,6 +55,8 @@ def submit_review(difficulty: str):
     current_paper = st.session_state.review_papers[st.session_state.current_review_index]
     response = ReviewResponse(flashpaper_id=current_paper.id, difficulty=difficulty)
     data_handler.process_review(response)
+    # Invalidate cache after review
+    invalidate_flashpapers_cache()
     next_paper()
 
 
@@ -166,8 +185,9 @@ with st.sidebar:
 
     from flashpapers.utils import AnalyticsUtils
 
+    cached_flashpapers = get_cached_flashpapers()
     analytics = AnalyticsUtils(st.session_state.storage)
-    stats = analytics.get_analytics()
+    stats = analytics.get_analytics(flashpapers=cached_flashpapers)
 
     st.metric("Total Papers", stats["total_papers"])
     st.metric("Reviewed", stats["reviewed_papers"])
@@ -177,7 +197,7 @@ with st.sidebar:
 
     # Upcoming reviews
     st.subheader("📅 Upcoming Reviews")
-    upcoming = analytics.get_upcoming_reviews(days=7)
+    upcoming = analytics.get_upcoming_reviews(days=7, flashpapers=cached_flashpapers)
     if upcoming:
         for item in upcoming[:5]:
             st.text(f"• {item['paper_title'][:30]}...")

@@ -1,20 +1,31 @@
 """Analytics and statistics dashboard."""
 
 import streamlit as st
+from typing import List
 
+from flashpapers.models import Flashpaper
 from flashpapers.utils import AnalyticsUtils
 
 st.set_page_config(page_title="Analytics", page_icon="📊", layout="wide")
+
+
+def get_cached_flashpapers() -> List[Flashpaper]:
+    """Get flashpapers from session state cache or load from storage."""
+    cache_key = "_flashpapers_cache"
+    if cache_key not in st.session_state:
+        st.session_state[cache_key] = st.session_state.storage.load_all()
+    return st.session_state[cache_key]
 
 st.title("📊 Analytics Dashboard")
 
 # Get instances from session state
 storage = st.session_state.storage
 analytics = AnalyticsUtils(storage)
+cached_flashpapers = get_cached_flashpapers()
 
 # Get analytics data
-stats = analytics.get_analytics()
-performance = analytics.get_performance_metrics()
+stats = analytics.get_analytics(flashpapers=cached_flashpapers)
+performance = analytics.get_performance_metrics(flashpapers=cached_flashpapers)
 
 # Overview metrics
 st.header("📈 Overview")
@@ -98,7 +109,7 @@ if performance["most_reviewed_paper"]:
 # Upcoming reviews
 st.header("📅 Upcoming Reviews")
 
-upcoming = analytics.get_upcoming_reviews(days=14)
+upcoming = analytics.get_upcoming_reviews(days=14, flashpapers=cached_flashpapers)
 
 if upcoming:
     col1, col2 = st.columns([3, 1])
