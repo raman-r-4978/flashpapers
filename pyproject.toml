@@ -2,9 +2,7 @@
 name = "flashpapers"
 version = "0.1.0"
 description = "Flashpaper App to help you recall papers quickly!"
-authors = [
-    {name = "Raman", email = "ramanrajarathinam@gmail.com"}
-]
+authors = ["Raman <ramanrajarathinam@gmail.com>"]
 readme = "README.md"
 license = "MIT"
 keywords = ["flashcards", "research", "papers", "spaced-repetition", "learning"]
@@ -31,7 +29,7 @@ pytest = "^8.3.5"
 pytest-cov = "^6.0.0"
 
 [tool.poetry.scripts]
-flashpapers = "streamlit run main_app.py"
+flashpapers = "flashpapers.cli:main"
 
 [build-system]
 requires = ["poetry-core"]
