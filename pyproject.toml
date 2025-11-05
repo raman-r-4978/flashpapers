@@ -6,15 +6,52 @@ authors = [
     {name = "Raman", email = "ramanrajarathinam@gmail.com"}
 ]
 readme = "README.md"
+license = "MIT"
+keywords = ["flashcards", "research", "papers", "spaced-repetition", "learning"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Science/Research",
+    "Topic :: Education",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
 
 [tool.poetry.dependencies]
 python = "^3.10"
 streamlit = "^1.46.1"
+pydantic = "^2.10.5"
+pandas = "^2.2.3"
+
+[tool.poetry.group.dev.dependencies]
 black = "^25.1.0"
 isort = "^6.0.1"
 ruff = "^0.12.3"
+pytest = "^8.3.5"
+pytest-cov = "^6.0.0"
 
+[tool.poetry.scripts]
+flashpapers = "streamlit run main_app.py"
 
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.black]
+line-length = 100
+target-version = ["py310", "py311", "py312"]
+
+[tool.isort]
+profile = "black"
+line_length = 100
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = "test_*.py"
+python_classes = "Test*"
+python_functions = "test_*"
+addopts = "-v --cov=flashpapers --cov-report=term-missing"

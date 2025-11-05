@@ -204,3 +204,13 @@ __marimo__/
 
 # Ruff
 .ruff_cache/
+
+# Flashpapers specific
+# User data (should not be committed)
+data/flashpapers.json
+data/config.json
+data/pdfs/
+data/backups/
+
+# Keep directory structure
+!data/.gitkeep
