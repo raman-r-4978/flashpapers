@@ -1,10 +1,27 @@
 """Add new papers to the collection."""
 
 import streamlit as st
+from typing import List
 
 from flashpapers.models import Flashpaper
 
 st.set_page_config(page_title="Add Papers", page_icon="➕", layout="wide")
+
+
+def get_cached_flashpapers() -> List[Flashpaper]:
+    """Get flashpapers from session state cache or load from storage."""
+    cache_key = "_flashpapers_cache"
+    if cache_key not in st.session_state:
+        st.session_state[cache_key] = st.session_state.storage.load_all()
+    return st.session_state[cache_key]
+
+
+def invalidate_flashpapers_cache() -> None:
+    """Invalidate the flashpapers cache in session state."""
+    cache_key = "_flashpapers_cache"
+    if cache_key in st.session_state:
+        del st.session_state[cache_key]
+    st.session_state.storage.invalidate_cache()
 
 st.title("➕ Add New Paper")
 
@@ -129,6 +146,9 @@ with st.form("add_paper_form", clear_on_submit=True):
                     flashpaper.pdf_path = pdf_path
                     data_handler.update_flashcard(flashpaper)
 
+                # Invalidate cache after adding paper
+                invalidate_flashpapers_cache()
+
                 st.success(f"✅ Paper added successfully! (ID: {flashpaper_id[:8]}...)")
                 st.balloons()
 
@@ -143,8 +163,9 @@ with col1:
 with col2:
     from flashpapers.utils import AnalyticsUtils
 
+    cached_flashpapers = get_cached_flashpapers()
     analytics = AnalyticsUtils(st.session_state.storage)
-    stats = analytics.get_analytics()
+    stats = analytics.get_analytics(flashpapers=cached_flashpapers)
     st.metric("Papers Reviewed", stats["reviewed_papers"])
 with col3:
     st.metric("Due for Review", stats["papers_due_today"])
