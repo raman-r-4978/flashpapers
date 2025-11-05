@@ -2,8 +2,6 @@
 
 import json
 
-import pytest
-
 from flashpapers.config import ConfigManager
 from flashpapers.models import AppConfig
 

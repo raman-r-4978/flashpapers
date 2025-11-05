@@ -4,9 +4,13 @@ import streamlit as st
 from typing import List
 
 from flashpapers.models import Flashpaper
-from flashpapers.utils import AnalyticsUtils
+from flashpapers.utils import AnalyticsUtils, FlashcardStorage
 
 st.set_page_config(page_title="Analytics", page_icon="📊", layout="wide")
+
+# Initialize session state
+if "storage" not in st.session_state:
+    st.session_state.storage = FlashcardStorage()
 
 
 def get_cached_flashpapers() -> List[Flashpaper]:

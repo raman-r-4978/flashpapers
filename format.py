@@ -24,6 +24,8 @@ def run_command(desc: str, cmd: list) -> bool:
         return True
     else:
         logger.error(f"✗ {desc} failed")
+        if result.stdout:
+            logger.error(result.stdout.strip())
         if result.stderr:
             logger.error(result.stderr.strip())
         return False

@@ -55,14 +55,54 @@ st.markdown(
 Welcome to **Flashpapers** - Your intelligent research paper memory system!
 
 ### Quick Start
-- **➕ Add Papers**: Add new research papers to your collection
-- **🔄 Review**: Review papers using spaced repetition
-- **🔍 Search**: Find papers by title, author, or keywords
-- **📊 Analytics**: Track your learning progress
+- **Add Papers**: Add new research papers to your collection
+- **Review**: Review papers using spaced repetition
+- **Search**: Find papers by title, author, or keywords
+- **Analytics**: Track your learning progress
 
 Select a page from the sidebar to get started.
 """
 )
+
+# Categories management
+st.divider()
+st.subheader("📁 Categories")
+current_categories = st.session_state.config.categories
+
+# Display current categories in a nicer format
+if current_categories:
+    st.markdown("**Current categories:**")
+    cols = st.columns(min(len(current_categories), 4))
+    for idx, cat in enumerate(current_categories):
+        with cols[idx % len(cols)]:
+            st.markdown(f"🏷️ `{cat}`")
+else:
+    st.info("No categories yet. Add your first category below!")
+
+# Add new category
+with st.expander("➕ Add New Category", expanded=False):
+    col1, col2 = st.columns([3, 1])
+    with col1:
+        new_category = st.text_input(
+            "Category name",
+            placeholder="Enter category name...",
+            label_visibility="collapsed"
+        )
+    with col2:
+        add_button = st.button("Add", type="primary", use_container_width=True)
+    
+    if add_button:
+        if new_category:
+            new_category = new_category.strip()
+            if new_category not in current_categories:
+                current_categories.append(new_category)
+                st.session_state.config_manager.update(categories=current_categories)
+                st.success(f"✅ Added category: **{new_category}**")
+                st.rerun()
+            else:
+                st.warning("⚠️ Category already exists")
+        else:
+            st.error("Please enter a category name")
 
 # Sidebar
 with st.sidebar:
@@ -71,27 +111,6 @@ with st.sidebar:
     # Display statistics (uses cache)
     total_papers = len(get_cached_flashpapers())
     st.metric("Total Papers", total_papers)
-
-    # Categories management
-    st.subheader("Categories")
-    current_categories = st.session_state.config.categories
-
-    # Display current categories
-    st.write("Current categories:")
-    for cat in current_categories:
-        st.text(f"• {cat}")
-
-    # Add new category
-    with st.expander("Add New Category"):
-        new_category = st.text_input("Category name")
-        if st.button("Add Category"):
-            if new_category and new_category not in current_categories:
-                current_categories.append(new_category)
-                st.session_state.config_manager.update(categories=current_categories)
-                st.success(f"Added category: {new_category}")
-                st.rerun()
-            elif new_category in current_categories:
-                st.warning("Category already exists")
 
     # Backup management
     st.subheader("Backup")

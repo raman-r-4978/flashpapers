@@ -2,8 +2,6 @@
 
 import json
 
-import pytest
-
 from flashpapers.models import Flashpaper
 
 

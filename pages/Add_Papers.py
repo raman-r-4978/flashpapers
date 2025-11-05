@@ -4,8 +4,21 @@ import streamlit as st
 from typing import List
 
 from flashpapers.models import Flashpaper
+from flashpapers.config import ConfigManager
+from flashpapers.utils import FlashcardDataHandler, FlashcardStorage
 
 st.set_page_config(page_title="Add Papers", page_icon="➕", layout="wide")
+
+# Initialize session state
+if "storage" not in st.session_state:
+    st.session_state.storage = FlashcardStorage()
+
+if "data_handler" not in st.session_state:
+    st.session_state.data_handler = FlashcardDataHandler(storage=st.session_state.storage)
+
+if "config_manager" not in st.session_state:
+    st.session_state.config_manager = ConfigManager()
+    st.session_state.config = st.session_state.config_manager.get_config()
 
 
 def get_cached_flashpapers() -> List[Flashpaper]:

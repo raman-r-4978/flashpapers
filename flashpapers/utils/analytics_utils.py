@@ -163,7 +163,9 @@ class AnalyticsUtils:
         reviewed_count = len([fp for fp in flashpapers if fp.review_count > 0])
         return round((reviewed_count / len(flashpapers)) * 100, 2)
 
-    def get_upcoming_reviews(self, days: int = 7, flashpapers: Optional[List[Flashpaper]] = None) -> List[Dict]:
+    def get_upcoming_reviews(
+        self, days: int = 7, flashpapers: Optional[List[Flashpaper]] = None
+    ) -> List[Dict]:
         """
         Get papers due for review in the next N days.
 

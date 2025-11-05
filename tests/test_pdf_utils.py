@@ -3,8 +3,6 @@
 from io import BytesIO
 from pathlib import Path
 
-import pytest
-
 from flashpapers.utils.pdf_utils import delete_pdf, get_pdf_path, save_pdf
 
 

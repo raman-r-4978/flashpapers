@@ -92,7 +92,9 @@ class SearchUtils:
 
         return results
 
-    def search_by_title(self, title_query: str, flashpapers: Optional[List[Flashpaper]] = None) -> List[Flashpaper]:
+    def search_by_title(
+        self, title_query: str, flashpapers: Optional[List[Flashpaper]] = None
+    ) -> List[Flashpaper]:
         """
         Search flashcards by title only.
 
@@ -108,7 +110,9 @@ class SearchUtils:
 
         return [fp for fp in flashpapers if query_lower in fp.paper_title.lower()]
 
-    def search_by_author(self, author_query: str, flashpapers: Optional[List[Flashpaper]] = None) -> List[Flashpaper]:
+    def search_by_author(
+        self, author_query: str, flashpapers: Optional[List[Flashpaper]] = None
+    ) -> List[Flashpaper]:
         """
         Search flashcards by author.
 
@@ -160,7 +164,9 @@ class SearchUtils:
 
         return sorted(list(categories))
 
-    def filter_by_category(self, category: str, flashpapers: Optional[List[Flashpaper]] = None) -> List[Flashpaper]:
+    def filter_by_category(
+        self, category: str, flashpapers: Optional[List[Flashpaper]] = None
+    ) -> List[Flashpaper]:
         """
         Get all flashcards in a specific category.
 
@@ -174,7 +180,9 @@ class SearchUtils:
         flashpapers = self._get_flashpapers(flashpapers)
         return [fp for fp in flashpapers if category in fp.category]
 
-    def filter_by_keyword(self, keyword: str, flashpapers: Optional[List[Flashpaper]] = None) -> List[Flashpaper]:
+    def filter_by_keyword(
+        self, keyword: str, flashpapers: Optional[List[Flashpaper]] = None
+    ) -> List[Flashpaper]:
         """
         Get all flashcards with a specific keyword.
 
@@ -188,7 +196,9 @@ class SearchUtils:
         flashpapers = self._get_flashpapers(flashpapers)
         return [fp for fp in flashpapers if keyword in fp.keywords]
 
-    def get_recent_papers(self, limit: int = 10, flashpapers: Optional[List[Flashpaper]] = None) -> List[Flashpaper]:
+    def get_recent_papers(
+        self, limit: int = 10, flashpapers: Optional[List[Flashpaper]] = None
+    ) -> List[Flashpaper]:
         """
         Get most recently added papers.
 

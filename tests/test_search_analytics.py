@@ -1,7 +1,5 @@
 """Tests for search and analytics utilities."""
 
-import pytest
-
 from flashpapers.models import ReviewResponse
 
 
@@ -166,7 +164,7 @@ class TestAnalyticsUtils:
         """Test retention rate calculation."""
         # Add papers
         paper_id1 = data_handler.add_flashcard(paper_title="Paper 1", authors="Author 1")
-        paper_id2 = data_handler.add_flashcard(paper_title="Paper 2", authors="Author 2")
+        data_handler.add_flashcard(paper_title="Paper 2", authors="Author 2")
 
         # Review one
         response = ReviewResponse(flashpaper_id=paper_id1, difficulty="easy")

@@ -1,9 +1,5 @@
 """Tests for flashcard data handler."""
 
-from datetime import datetime, timedelta
-
-import pytest
-
 from flashpapers.models import ReviewResponse
 
 
@@ -43,12 +39,8 @@ class TestFlashcardDataHandler:
     def test_get_flashcards_for_review(self, data_handler):
         """Test getting flashcards for review."""
         # Add some papers
-        paper_id1 = data_handler.add_flashcard(
-            paper_title="Paper 1", authors="Author 1", tags=["test"]
-        )
-        paper_id2 = data_handler.add_flashcard(
-            paper_title="Paper 2", authors="Author 2", tags=["test"]
-        )
+        data_handler.add_flashcard(paper_title="Paper 1", authors="Author 1", tags=["test"])
+        data_handler.add_flashcard(paper_title="Paper 2", authors="Author 2", tags=["test"])
 
         # Both should be due for review
         due_papers = data_handler.get_flashcards_for_review()
@@ -71,7 +63,6 @@ class TestFlashcardDataHandler:
         # Get initial state
         paper = data_handler.get_flashcard_by_id(paper_id)
         initial_ease = paper.ease_factor
-        initial_interval = paper.interval_days
 
         # Process easy review
         response = ReviewResponse(flashpaper_id=paper_id, difficulty="easy")

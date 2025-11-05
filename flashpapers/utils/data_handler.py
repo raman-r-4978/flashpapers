@@ -58,10 +58,13 @@ class FlashcardDataHandler:
         if answer and not kwargs.get("results_and_findings"):
             kwargs["results_and_findings"] = answer
 
+        # Handle keywords: prefer explicit keywords from kwargs, fallback to tags
+        keywords = kwargs.pop("keywords", None) or tags or []
+
         flashpaper = Flashpaper(
             paper_title=paper_title,
             authors=authors,
-            keywords=tags or [],
+            keywords=keywords,
             **kwargs,
         )
 
